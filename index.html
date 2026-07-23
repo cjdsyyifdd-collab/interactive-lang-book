@@ -25,6 +25,15 @@
       <button class="primary-btn" id="importPdfBtn">+ استيراد PDF</button>
       <input id="pdfInput" type="file" accept="application/pdf" hidden />
 
+      <div class="section-title">الأدوات</div>
+      <div class="stack">
+        <button class="primary-btn small" id="editModeBtn">✎ تحرير الحقول</button>
+        <button class="primary-btn small" id="addFieldBtn">+ إضافة حقل</button>
+        <button class="primary-btn small" id="exportBtn">⬇ تصدير الحقول</button>
+        <button class="primary-btn small" id="importOverlayBtn">⬆ استيراد الحقول</button>
+        <input id="overlayFileInput" type="file" accept="application/json" hidden />
+      </div>
+
       <div class="section-title">الكتاب</div>
       <div id="bookList" class="stack"></div>
 
@@ -134,7 +143,9 @@
           <label class="setting-row"><span>حفظ تلقائي</span><input id="autosaveToggle" type="checkbox" checked /></label>
           <label class="setting-row"><span>إظهار الطبقة</span><input id="overlayToggle" type="checkbox" checked /></label>
           <div class="summary-box">
-            هذه نسخة بداية للفصل الأول، ويمكنك رفعها على GitHub Pages أو استخدامها كتطبيق PWA.
+            ✓ تم دعم تحرير الحقول وتصدير/استيراد البيانات<br>
+            ✓ الخدمة الخلفية (Service Worker) مفعلة للعمل بلا إنترنت<br>
+            ✓ تم توسيع الصفحات ليشمل 12-25
           </div>
         </div>
       </section>
