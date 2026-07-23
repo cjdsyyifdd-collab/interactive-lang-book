@@ -1,0 +1,3 @@
+Place the two PDF parts you uploaded into the project root if you want to test locally:
+- Netzwerk neu A2 KB_240927_170654-1-80.pdf
+- Netzwerk neu A2 KB_240927_170654-81-180.pdf

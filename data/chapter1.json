@@ -1,0 +1,291 @@
+{
+  "bookId": "netzwerk-neu-a2",
+  "bookTitle": "Netzwerk neu A2",
+  "chapterTitle": "Kapitel 1 - über Vergangenes berichten",
+  "pages": [
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "templates": {
+    "12": [
+      {
+        "id": "c1",
+        "type": "text",
+        "label": "1",
+        "x": 31.5,
+        "y": 77.5,
+        "w": 17.5,
+        "h": 4.4,
+        "placeholder": "Julia hat ..."
+      },
+      {
+        "id": "c2",
+        "type": "text",
+        "label": "2",
+        "x": 31.5,
+        "y": 82.3,
+        "w": 17.5,
+        "h": 4.4,
+        "placeholder": "Jonas ..."
+      },
+      {
+        "id": "c3",
+        "type": "text",
+        "label": "3",
+        "x": 31.5,
+        "y": 87.1,
+        "w": 17.5,
+        "h": 4.4,
+        "placeholder": "..."
+      },
+      {
+        "id": "c4",
+        "type": "text",
+        "label": "4",
+        "x": 31.5,
+        "y": 91.9,
+        "w": 17.5,
+        "h": 4.4,
+        "placeholder": "..."
+      },
+      {
+        "id": "c5",
+        "type": "text",
+        "label": "5",
+        "x": 65.0,
+        "y": 77.5,
+        "w": 17.5,
+        "h": 4.4,
+        "placeholder": "..."
+      },
+      {
+        "id": "c6",
+        "type": "text",
+        "label": "6",
+        "x": 65.0,
+        "y": 82.3,
+        "w": 17.5,
+        "h": 4.4,
+        "placeholder": "..."
+      },
+      {
+        "id": "c7",
+        "type": "text",
+        "label": "7",
+        "x": 65.0,
+        "y": 87.1,
+        "w": 17.5,
+        "h": 4.4,
+        "placeholder": "..."
+      },
+      {
+        "id": "c8",
+        "type": "text",
+        "label": "8",
+        "x": 65.0,
+        "y": 91.9,
+        "w": 17.5,
+        "h": 4.4,
+        "placeholder": "..."
+      }
+    ],
+    "13": [
+      {
+        "id": "a1",
+        "type": "checkbox",
+        "label": "A",
+        "x": 15.8,
+        "y": 59.3,
+        "w": 3.1,
+        "h": 3.1
+      },
+      {
+        "id": "a2",
+        "type": "checkbox",
+        "label": "B",
+        "x": 28.2,
+        "y": 59.3,
+        "w": 3.1,
+        "h": 3.1
+      },
+      {
+        "id": "a3",
+        "type": "checkbox",
+        "label": "C",
+        "x": 40.5,
+        "y": 59.3,
+        "w": 3.1,
+        "h": 3.1
+      },
+      {
+        "id": "a4",
+        "type": "checkbox",
+        "label": "D",
+        "x": 52.9,
+        "y": 59.3,
+        "w": 3.1,
+        "h": 3.1
+      },
+      {
+        "id": "b1",
+        "type": "text",
+        "label": "1",
+        "x": 15.8,
+        "y": 70.2,
+        "w": 16.0,
+        "h": 4.2,
+        "placeholder": "wie ich"
+      },
+      {
+        "id": "b2",
+        "type": "text",
+        "label": "2",
+        "x": 15.8,
+        "y": 75.0,
+        "w": 16.0,
+        "h": 4.2,
+        "placeholder": "wie acht"
+      },
+      {
+        "id": "b3",
+        "type": "text",
+        "label": "3",
+        "x": 15.8,
+        "y": 79.8,
+        "w": 16.0,
+        "h": 4.2,
+        "placeholder": "..."
+      },
+      {
+        "id": "b4",
+        "type": "text",
+        "label": "4",
+        "x": 15.8,
+        "y": 84.6,
+        "w": 16.0,
+        "h": 4.2,
+        "placeholder": "..."
+      }
+    ],
+    "14": [
+      {
+        "id": "r1",
+        "type": "text",
+        "label": "A",
+        "x": 9.8,
+        "y": 60.0,
+        "w": 24.0,
+        "h": 4.8,
+        "placeholder": "Antwort A"
+      },
+      {
+        "id": "r2",
+        "type": "text",
+        "label": "B",
+        "x": 39.0,
+        "y": 60.0,
+        "w": 24.0,
+        "h": 4.8,
+        "placeholder": "Antwort B"
+      },
+      {
+        "id": "r3",
+        "type": "text",
+        "label": "C",
+        "x": 68.2,
+        "y": 60.0,
+        "w": 24.0,
+        "h": 4.8,
+        "placeholder": "Antwort C"
+      },
+      {
+        "id": "s1",
+        "type": "text",
+        "label": "7a",
+        "x": 10.0,
+        "y": 87.4,
+        "w": 22.0,
+        "h": 4.2,
+        "placeholder": "1"
+      },
+      {
+        "id": "s2",
+        "type": "text",
+        "label": "7b",
+        "x": 10.0,
+        "y": 92.0,
+        "w": 22.0,
+        "h": 4.2,
+        "placeholder": "2"
+      }
+    ],
+    "15": [
+      {
+        "id": "q1",
+        "type": "text",
+        "label": "1",
+        "x": 18.0,
+        "y": 44.5,
+        "w": 18.0,
+        "h": 4.4,
+        "placeholder": "Perfekt"
+      },
+      {
+        "id": "q2",
+        "type": "text",
+        "label": "2",
+        "x": 18.0,
+        "y": 50.0,
+        "w": 18.0,
+        "h": 4.4,
+        "placeholder": "..."
+      },
+      {
+        "id": "q3",
+        "type": "text",
+        "label": "3",
+        "x": 18.0,
+        "y": 55.4,
+        "w": 18.0,
+        "h": 4.4,
+        "placeholder": "..."
+      },
+      {
+        "id": "q4",
+        "type": "text",
+        "label": "4",
+        "x": 18.0,
+        "y": 60.8,
+        "w": 18.0,
+        "h": 4.4,
+        "placeholder": "..."
+      },
+      {
+        "id": "q5",
+        "type": "text",
+        "label": "5",
+        "x": 18.0,
+        "y": 66.2,
+        "w": 18.0,
+        "h": 4.4,
+        "placeholder": "..."
+      },
+      {
+        "id": "q6",
+        "type": "text",
+        "label": "6",
+        "x": 18.0,
+        "y": 71.6,
+        "w": 18.0,
+        "h": 4.4,
+        "placeholder": "..."
+      }
+    ]
+  }
+}

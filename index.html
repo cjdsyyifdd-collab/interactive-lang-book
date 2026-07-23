@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#87b84b" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <title>Netzwerk neu A2 - Kapitel 1</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-badge">A2</div>
+        <div>
+          <div class="brand-title">Netzwerk neu A2</div>
+          <div class="brand-subtitle">Kapitel 1 - تفاعلي</div>
+        </div>
+      </div>
+
+      <button class="primary-btn" id="importPdfBtn">+ استيراد PDF</button>
+      <input id="pdfInput" type="file" accept="application/pdf" hidden />
+
+      <div class="section-title">الكتاب</div>
+      <div id="bookList" class="stack"></div>
+
+      <div class="section-title">القوائم</div>
+      <div class="stack">
+        <button class="nav-item active" data-panel="contentsPanel">Buch</button>
+        <button class="nav-item" data-panel="notesPanel">Notizen</button>
+        <button class="nav-item" data-panel="listeningPanel">Hören</button>
+        <button class="nav-item" data-panel="vocabPanel">Wörter</button>
+        <button class="nav-item" data-panel="settingsPanel">Einstellungen</button>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn" id="toggleSidebarBtn" aria-label="toggle sidebar">☰</button>
+          <div>
+            <div id="bookTitle" class="top-title">Netzwerk neu A2</div>
+            <div id="bookMeta" class="top-subtitle">Kapitel 1 - تفاعلي</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" id="searchBtn">⌕</button>
+          <button class="icon-btn" id="bookmarkBtn">🔖</button>
+          <button class="icon-btn" id="penBtn">✎</button>
+          <button class="icon-btn" id="themeBtn">◐</button>
+        </div>
+      </header>
+
+      <section class="reader-shell">
+        <div class="reader-toolbar">
+          <div class="pager">
+            <button class="mini-btn" id="prevPageBtn">‹</button>
+            <span id="pageIndicator">0 / 0</span>
+            <button class="mini-btn" id="nextPageBtn">›</button>
+          </div>
+          <div id="toolState" class="tool-state">جاهز</div>
+          <div class="zoom">
+            <button class="mini-btn" id="zoomOutBtn">−</button>
+            <input id="zoomSlider" type="range" min="0.8" max="2.3" step="0.05" value="1.18" />
+            <button class="mini-btn" id="zoomInBtn">+</button>
+          </div>
+        </div>
+
+        <div id="reader" class="reader">
+          <div id="emptyState" class="empty-state">
+            <h2>استورد PDF الكتاب</h2>
+            <p>هذا المشروع جاهز لكتاب Netzwerk neu A2، ويعرض الفصل الأول بطبقة تفاعلية فوق صفحات الكتاب الأصلية.</p>
+          </div>
+
+          <div id="pdfWrapper" class="pdf-wrapper hidden">
+            <canvas id="pdfCanvas"></canvas>
+            <div id="overlayLayer" class="overlay-layer"></div>
+          </div>
+        </div>
+
+        <div class="bottom-toolbar">
+          <button class="tool-btn" id="noteToolBtn">📝 Note</button>
+          <button class="tool-btn" id="highlightToolBtn">🖍 Highlight</button>
+          <button class="tool-btn" id="writeToolBtn">✎ Write</button>
+          <button class="tool-btn" id="eraseToolBtn">⌫ Eraser</button>
+          <button class="tool-btn" id="audioToolBtn">🎧 Hören</button>
+        </div>
+      </section>
+
+      <section class="panels">
+        <div id="contentsPanel" class="panel active">
+          <h3>الصفحة الحالية</h3>
+          <div id="pageSummary" class="summary-box">...</div>
+          <div class="card-title">إجابات الصفحة</div>
+          <div id="answersList" class="stack"></div>
+        </div>
+
+        <div id="notesPanel" class="panel">
+          <h3>Notizen</h3>
+          <textarea id="notesInput" class="notes-input" placeholder="اكتب الملاحظة هنا..."></textarea>
+          <button id="saveNoteBtn" class="primary-btn small">حفظ</button>
+          <div id="notesList" class="stack"></div>
+        </div>
+
+        <div id="listeningPanel" class="panel">
+          <h3>Hören</h3>
+          <div class="summary-box">اربط صوتًا بكل صفحة أو تمرين مثل 1.12 و1.15.</div>
+          <div class="audio-row">
+            <input id="audioLabelInput" class="text-input" placeholder="مثال: 1.15" />
+            <button id="attachAudioBtn" class="primary-btn small">إضافة صوت</button>
+          </div>
+          <input id="audioFileInput" type="file" accept="audio/*" hidden />
+          <div id="audioList" class="stack"></div>
+          <audio id="audioPlayer" controls class="audio-player hidden"></audio>
+        </div>
+
+        <div id="vocabPanel" class="panel">
+          <h3>Wörter</h3>
+          <div class="audio-row">
+            <input id="vocabWordInput" class="text-input" placeholder="الكلمة" />
+            <input id="vocabMeaningInput" class="text-input" placeholder="المعنى" />
+          </div>
+          <button id="addVocabBtn" class="primary-btn small">إضافة</button>
+          <div id="vocabList" class="stack"></div>
+        </div>
+
+        <div id="settingsPanel" class="panel">
+          <h3>Einstellungen</h3>
+          <label class="setting-row"><span>الوضع الداكن</span><input id="darkModeToggle" type="checkbox" /></label>
+          <label class="setting-row"><span>حفظ تلقائي</span><input id="autosaveToggle" type="checkbox" checked /></label>
+          <label class="setting-row"><span>إظهار الطبقة</span><input id="overlayToggle" type="checkbox" checked /></label>
+          <div class="summary-box">
+            هذه نسخة بداية للفصل الأول، ويمكنك رفعها على GitHub Pages أو استخدامها كتطبيق PWA.
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

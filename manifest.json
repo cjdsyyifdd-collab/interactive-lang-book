@@ -1,0 +1,21 @@
+{
+  "name": "Netzwerk neu A2 - Kapitel 1",
+  "short_name": "Netzwerk A2",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f8f1",
+  "theme_color": "#87b84b",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
