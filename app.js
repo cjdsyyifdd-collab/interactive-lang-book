@@ -30,7 +30,8 @@ const state = {
   activeTool: 'write',
   pdfObjectUrl: null,
   selectedOverlayId: null,
-  editMode: false
+  editMode: false,
+  pdfBlob: null
 };
 
 const $ = (s) => document.querySelector(s);
@@ -194,7 +195,7 @@ function setupUI() {
 
   $('#searchBtn').addEventListener('click', () => alert('ميزة البحث ستُضاف في النسخة التالية.'));
   $('#bookmarkBtn').addEventListener('click', () => alert(`تم حفظ الصفحة ${state.currentPage} كإشارة مرجعية.`));
-  $('#penBtn').addEventListener('click', () => alert('يمكنك الكتابة داخل الخانات الظاهرة فوق الصفحة.'));
+  $('#penBtn').addEventListener('click', () => alert('��مكنك الكتابة داخل الخانات الظاهرة فوق الصفحة.'));
   $$('.nav-item').forEach(btn => btn.addEventListener('click', () => switchPanel(btn.dataset.panel)));
 
   window.addEventListener('keydown', (e) => {
@@ -235,24 +236,40 @@ function onImportPdf(e) {
   const reader = new FileReader();
   reader.onload = async (event) => {
     try {
-      const arrayBuffer = event.target.result;
+      const blob = new Blob([event.target.result], { type: 'application/pdf' });
       const id = `book_${Date.now()}`;
+      
+      // حفظ Blob URL مؤقتًا في الذاكرة
+      const blobUrl = URL.createObjectURL(blob);
+      
       const newBook = {
         id,
         title: file.name.replace(/\.pdf$/i, ''),
         subtitle: chapter1Data.subtitle,
-        pdfData: arrayBuffer,
+        pdfBlobUrl: blobUrl,
         pages: chapter1Data.pages,
         imported: true
       };
+      
       state.books.unshift(newBook);
       state.currentBookId = id;
       state.currentPage = 12;
-      writeJSON(STORAGE.books, state.books.map(b => ({ ...b, pdfData: undefined })));
-      localStorage.setItem(`${STORAGE.books}:${id}:data`, btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer))));
+      
+      // حفظ metadata فقط بدون الملف الثنائي
+      const booksMetadata = state.books.map(b => ({
+        id: b.id,
+        title: b.title,
+        subtitle: b.subtitle,
+        pages: b.pages,
+        imported: b.imported
+      }));
+      writeJSON(STORAGE.books, booksMetadata);
+      
       saveCurrentState();
       renderBookList();
       await openCurrentBook();
+      
+      console.log('✓ PDF imported successfully');
     } catch (err) {
       console.error('Error importing PDF:', err);
       alert('خطأ في استيراد الملف: ' + err.message);
@@ -280,21 +297,14 @@ async function openCurrentBook() {
 
   try {
     let pdfUrl;
-    if (book.imported) {
-      const pdfData = localStorage.getItem(`${STORAGE.books}:${book.id}:data`);
-      if (pdfData) {
-        const binaryString = atob(pdfData);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        const blob = new Blob([bytes], { type: 'application/pdf' });
-        pdfUrl = URL.createObjectURL(blob);
-      } else {
-        throw new Error('No PDF data found');
-      }
+    
+    if (book.imported && book.pdfBlobUrl) {
+      // استخدام الـ Blob URL المحفوظ
+      pdfUrl = book.pdfBlobUrl;
+      console.log('Using stored Blob URL');
     } else {
       pdfUrl = book.pdfUrl || './sample-network-a2.pdf';
+      console.log('Using book URL:', pdfUrl);
     }
 
     if (state.pdfObjectUrl && state.pdfObjectUrl !== pdfUrl) {
@@ -306,10 +316,13 @@ async function openCurrentBook() {
     
     await ensurePdfWorker();
     
+    console.log('Loading PDF from:', pdfUrl);
     state.pdfDoc = await window.pdfjsLib.getDocument(pdfUrl).promise;
     const pageCount = state.pdfDoc.numPages;
     state.currentPage = clamp(state.currentPage || 1, 1, pageCount);
 
+    console.log('✓ PDF loaded with', pageCount, 'pages');
+    
     $('#pageIndicator').textContent = `${state.currentPage} / ${pageCount}`;
     $('#zoomSlider').value = state.zoom;
     renderPage();
@@ -319,6 +332,7 @@ async function openCurrentBook() {
   } catch (err) {
     console.error('Error opening book:', err);
     $('#emptyState').classList.remove('hidden');
+    $('#pdfWrapper').classList.add('hidden');
     setStatus('خطأ في فتح الملف', 'تحقق من صيغة الملف: ' + err.message);
   }
 }
