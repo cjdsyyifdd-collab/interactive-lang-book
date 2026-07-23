@@ -1,25 +1,100 @@
 # Netzwerk neu A2 - Kapitel 1 PWA
 
-This is a starter PWA for making the first chapter of Netzwerk neu A2 interactive.
+تطبيق تفاعلي لجعل الفصل الأول من كتاب Netzwerk neu A2 تفاعليًا. يمكنك استيراد ملف PDF والكتابة مباشرة فوق الصفحات، مع حفظ الإجابات محليًا في المتصفح.
 
-## What is included
-- PDF import from phone
-- PDF.js rendering
-- Chapter 1 overlay templates for starter pages
-- Save answers locally
-- Notes
-- Audio linking
-- Vocabulary list
-- Offline service worker
+## الميزات الرئيسية
 
-## How to use
-1. Open the app in a browser or GitHub Pages.
-2. Tap **استيراد PDF** and select the book file.
-3. Go to the chapter 1 pages.
-4. Type answers directly over the book.
+- ✅ **استيراد PDF من الهاتف** - اختر ملف الكتاب من جهازك
+- ✅ **عرض PDF تفاعلي** - يعرض الفصل الأول بصيغة تفاعلية
+- ✅ **طبقة تفاعلية** - حقول نص وخانات اختيار فوق الصفحات
+- ✅ **حفظ الإجابات محليًا** - جميع البيانات تُحفظ في المتصفح
+- ✅ **ملاحظات وملخصات** - أضف ملاحظاتك الخاصة
+- ✅ **ربط الملفات الصوتية** - اربط ملفات صوتية بكل صفحة
+- ✅ **قائمة المفردات** - احفظ الكلمات الجديدة
+- ✅ **تحرير الحقول** - أضف أو عدّل الحقول مباشرة من التطبيق
+- ✅ **تصدير واستيراد البيانات** - احفظ بياناتك وشاركها
+- ✅ **العمل بدون إنترنت** - خدمة الويب الخلفية تتيح العمل بدون إنترنت
 
-## Important
-The overlay coordinates are a starter template for chapter 1 pages. You can add more fields later in `data/chapter1.json` or extend the app with a drag-and-drop editor.
+## كيفية الاستخدام
 
-## For GitHub
-Upload all files in this folder to a repository and enable GitHub Pages from the main branch.
+### الطريقة 1: تشغيل محلي
+
+```bash
+git clone https://github.com/cjdsyyifdd-collab/interactive-lang-book.git
+cd interactive-lang-book
+python -m http.server 8000
+# ثم افتح http://localhost:8000
+```
+
+### الطريقة 2: GitHub Pages
+
+1. ادفع الملفات إلى مستودع عام
+2. اذهب إلى **Settings → Pages**
+3. اختر `main` branch وانقر **Save**
+
+### الخطوات الأساسية
+
+1. افتح التطبيق في المتصفح
+2. اضغط على **+ استيراد PDF** واختر ملف الكتاب
+3. انتقل إلى الصفحات (12-25)
+4. اكتب الإجابات في الحقول
+5. استخدم الأدوات:
+   - **✎ تحرير الحقول**: عدّل الحقول
+   - **+ إضافة حقل**: أنشئ حقل جديد
+   - **⬇ تصدير الحقول**: احفظ البيانات
+   - **⬆ استيراد الحقول**: استعد البيانات
+
+## الهيكل المشروع
+
+```
+.
+├── index.html              واجهة المستخدم
+├── app.js                  منطق التطبيق
+├── styles.css              التصميم
+├── sw.js                   خدمة الويب (Offline)
+├── manifest.json           بيانات PWA
+├── data/chapter1.json      حقول الصفحات 12-25
+└── icons/                  أيقونات التطبيق
+```
+
+## المشاكل التي تم حلها
+
+### ✅ 1. أيقونات التطبيق مفقودة
+تم إضافة ملفات الأيقونات (icon-192.png و icon-512.png)
+
+### ✅ 2. عدم توفر ملف PDF عينة
+التطبيق يدعم الآن استيراد أي ملف PDF من جهازك
+
+### ✅ 3. تغطية محدودة للصفحات
+تم توسيع الصفحات من 8 (12-19) إلى 14 صفحة (12-25)
+
+### ✅ 4. عدم القدرة على إضافة حقول جديدة
+تم إضافة وضع التحرير الكامل مع:
+- تحرير الحقول الموجودة
+- إضافة حقول جديدة
+- تصدير البيانات إلى ملف
+- استيراد البيانات من ملف
+
+### ✅ 5. خدمة الويب الخلفية غير موثوقة
+تحسين sw.js مع معالجة أفضل للأخطاء والأصول
+
+## التكنولوجيا
+
+- JavaScript Vanilla
+- HTML5 & CSS3 (مع Animations)
+- PDF.js (عرض PDF)
+- Web APIs: Service Worker, localStorage, File API, Canvas
+
+## المتطلبات
+
+- متصفح حديث يدعم ES6 و Service Workers
+
+## الملاحظات
+
+- جميع البيانات تُحفظ محليًا في متصفحك فقط
+- لا توجد خوادم خارجية
+- يمكنك حذف البيانات بمسح بيانات المتصفح
+
+---
+
+لأي استفسارات أو اقتراحات، يرجى فتح issue على GitHub.
