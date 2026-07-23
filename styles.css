@@ -20,7 +20,7 @@ body.dark{
 #app{display:flex;height:100vh;overflow:hidden}
 .sidebar{
   width:var(--sidebar-w);background:var(--panel);border-left:1px solid var(--line);
-  padding:16px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow);z-index:20
+  padding:16px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow);z-index:20;overflow-y:auto
 }
 .sidebar.hidden{display:none}
 .brand{display:flex;align-items:center;gap:12px;padding-bottom:8px}
@@ -30,20 +30,26 @@ body.dark{
 }
 .brand-title{font-weight:900;font-size:1.05rem}
 .brand-subtitle{font-size:.82rem;color:var(--muted)}
-.section-title{font-size:.85rem;color:var(--muted);font-weight:800}
+.section-title{font-size:.85rem;color:var(--muted);font-weight:800;margin-top:8px}
 .stack{display:flex;flex-direction:column;gap:8px}
 .book-item,.nav-item,.mini-btn,.tool-btn,.icon-btn,.primary-btn,.checkbox-pill{
   border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:16px;cursor:pointer;
+  transition:all 0.2s ease;
 }
-.book-item{padding:10px 12px;text-align:right}
+.book-item{padding:10px 12px;text-align:right;font-size:.9rem}
 .book-item.active,.nav-item.active{background:rgba(135,184,75,.16);border-color:var(--accent)}
+.book-item:hover,.nav-item:hover{background:rgba(135,184,75,.08)}
 .nav-item{padding:11px 12px;text-align:right;font-weight:700}
 .primary-btn{
-  background:linear-gradient(135deg,var(--accent),#6ca03c);color:white;border:none;padding:12px 16px;font-weight:800
+  background:linear-gradient(135deg,var(--accent),#6ca03c);color:white;border:none;padding:12px 16px;font-weight:800;
+  transition:transform 0.2s ease;
 }
-.primary-btn.small{padding:10px 14px;border-radius:14px}
-.icon-btn,.mini-btn{width:42px;height:42px;display:grid;place-items:center}
-.tool-btn{height:42px;padding:0 14px;font-weight:800}
+.primary-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(135,184,75,.3)}
+.primary-btn.small{padding:10px 14px;border-radius:14px;font-size:.9rem}
+.icon-btn,.mini-btn{width:42px;height:42px;display:grid;place-items:center;transition:all 0.2s ease}
+.icon-btn:hover,.mini-btn:hover{background:var(--accent-2);border-color:var(--accent)}
+.tool-btn{height:42px;padding:0 14px;font-weight:800;transition:all 0.2s ease}
+.tool-btn:hover{background:var(--accent-2);border-color:var(--accent)}
 .workspace{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .topbar{
   height:74px;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;
@@ -61,7 +67,7 @@ body.dark{
 .pager,.zoom{display:flex;align-items:center;gap:10px}
 .tool-state{font-size:.9rem;color:var(--muted);font-weight:700}
 #pageIndicator{font-weight:900;color:var(--muted);min-width:74px;text-align:center}
-#zoomSlider{width:min(42vw,330px)}
+#zoomSlider{width:min(42vw,330px);cursor:pointer}
 .reader{
   flex:1;overflow:auto;background:linear-gradient(180deg,rgba(0,0,0,.02),transparent);
   border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;justify-content:center;align-items:flex-start
@@ -74,21 +80,31 @@ body.dark{
 .overlay-layer{position:absolute;inset:0;pointer-events:none}
 .field-box{
   position:absolute;pointer-events:auto;background:rgba(255,255,255,.82);border:1.5px solid rgba(135,184,75,.35);
-  border-radius:11px;padding:4px 6px
+  border-radius:11px;padding:4px 6px;transition:all 0.2s ease;
 }
+.field-box.editable{
+  background:rgba(255,200,200,.5);border:2px solid #ff6b6b;cursor:move;
+}
+.field-box.editable:hover{background:rgba(255,100,100,.7)}
 .field-tag{
   position:absolute;right:4px;top:-18px;font-size:11px;color:var(--muted);
   background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:999px;padding:1px 6px
 }
 .answer-input{
-  width:100%;height:100%;border:none;background:transparent;outline:none;color:var(--text);font-size:14px
+  width:100%;height:100%;border:none;background:transparent;outline:none;color:var(--text);font-size:14px;
+  transition:all 0.2s ease;
 }
+.answer-input:focus{background:rgba(135,184,75,.1)}
 .checkbox-pill{
-  width:100%;height:100%;display:grid;place-items:center;font-size:18px;font-weight:900
+  width:100%;height:100%;display:grid;place-items:center;font-size:18px;font-weight:900;
+  transition:all 0.2s ease;
 }
+.checkbox-pill:hover{background:var(--accent-2)}
 .checkmark{
-  position:absolute;left:-24px;top:50%;transform:translateY(-50%);font-size:1.12rem;color:#49a028;font-weight:900
+  position:absolute;left:-24px;top:50%;transform:translateY(-50%);font-size:1.12rem;color:#49a028;font-weight:900;
+  animation:fadeIn 0.3s ease;
 }
+@keyframes fadeIn{from{opacity:0;transform:translateY(-50%) scale(0.8)}to{opacity:1;transform:translateY(-50%) scale(1)}}
 .bottom-toolbar{
   display:flex;gap:10px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);
   border-radius:var(--radius);padding:10px 12px;box-shadow:var(--shadow)
@@ -98,31 +114,48 @@ body.dark{
   display:none;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)
 }
 .panel.active{display:block}
-.panel h3{margin:0 0 12px}
+.panel h3{margin:0 0 12px;color:var(--text)}
 .summary-box{
-  background:var(--panel-2);border:1px dashed var(--line);border-radius:16px;padding:12px;color:var(--muted);line-height:1.6
+  background:var(--panel-2);border:1px dashed var(--line);border-radius:16px;padding:12px;color:var(--muted);line-height:1.6;
+  font-size:.9rem;
 }
-.card-title{font-weight:900;margin-top:12px;margin-bottom:10px}
+.card-title{font-weight:900;margin-top:12px;margin-bottom:10px;color:var(--text)}
 .card-row,.answer-row{
   display:flex;justify-content:space-between;align-items:center;gap:10px;
-  padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--panel-2)
+  padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--panel-2);
+  transition:all 0.2s ease;
 }
+.card-row:hover,.answer-row:hover{background:var(--accent-2);border-color:var(--accent)}
+.card-row > div,.answer-row > div{flex:1}
+.card-row strong,.answer-row strong{color:var(--text)}
+.card-row small,.answer-row small{color:var(--muted);font-size:.85rem}
 .notes-input,.text-input{
   width:100%;border:1px solid var(--line);background:var(--panel-2);color:var(--text);
-  border-radius:14px;padding:10px 12px;min-height:42px;outline:none
+  border-radius:14px;padding:10px 12px;min-height:42px;outline:none;
+  transition:all 0.2s ease;font-family:inherit;
 }
+.notes-input:focus,.text-input:focus{border-color:var(--accent);background:var(--panel)}
 .notes-input{min-height:112px;resize:vertical}
 .audio-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
-.audio-player{width:100%;margin-top:10px}
-.setting-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.audio-player{width:100%;margin-top:10px;border-radius:8px}
+.setting-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);transition:all 0.2s ease}
+.setting-row:hover{background:var(--accent-2);padding:10px 8px}
 .setting-row:last-child{border-bottom:none}
-input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent)}
+.setting-row span{font-weight:600}
+input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
 button:focus,input:focus,textarea:focus{outline:2px solid rgba(135,184,75,.35);outline-offset:2px}
 
 @media (max-width: 960px){
-  .sidebar{position:absolute;left:0;top:0;bottom:0;width:min(84vw,320px);transform:translateX(0)}
+  .sidebar{position:absolute;left:0;top:0;bottom:0;width:min(84vw,320px);transform:translateX(0);z-index:100}
   .sidebar.hidden{display:flex;transform:translateX(-105%)}
   .audio-row{grid-template-columns:1fr}
   .panels{max-height:30vh}
   .reader-shell{padding:10px}
+}
+
+@media (max-width: 640px){
+  .reader-toolbar{flex-wrap:wrap;justify-content:center}
+  #zoomSlider{width:100%;max-width:200px}
+  .bottom-toolbar{justify-content:center}
+  .tool-btn{flex:0 1 calc(50% - 5px)}
 }
