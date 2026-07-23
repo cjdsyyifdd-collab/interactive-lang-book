@@ -227,24 +227,38 @@ function switchPanel(panelId) {
 function onImportPdf(e) {
   const file = e.target.files?.[0];
   if (!file) return;
-  if (file.type !== 'application/pdf') return alert('اختر ملف PDF صحيح.');
-  const id = `book_${Date.now()}`;
-  const url = URL.createObjectURL(file);
-  const newBook = {
-    id,
-    title: file.name.replace(/\.pdf$/i, ''),
-    subtitle: chapter1Data.subtitle,
-    pdfUrl: url,
-    pages: chapter1Data.pages,
-    imported: true
+  if (file.type !== 'application/pdf') {
+    alert('اختر ملف PDF صحيح.');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = async (event) => {
+    try {
+      const arrayBuffer = event.target.result;
+      const id = `book_${Date.now()}`;
+      const newBook = {
+        id,
+        title: file.name.replace(/\.pdf$/i, ''),
+        subtitle: chapter1Data.subtitle,
+        pdfData: arrayBuffer,
+        pages: chapter1Data.pages,
+        imported: true
+      };
+      state.books.unshift(newBook);
+      state.currentBookId = id;
+      state.currentPage = 12;
+      writeJSON(STORAGE.books, state.books.map(b => ({ ...b, pdfData: undefined })));
+      localStorage.setItem(`${STORAGE.books}:${id}:data`, btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer))));
+      saveCurrentState();
+      renderBookList();
+      await openCurrentBook();
+    } catch (err) {
+      console.error('Error importing PDF:', err);
+      alert('خطأ في استيراد الملف: ' + err.message);
+    }
   };
-  state.books.unshift(newBook);
-  state.currentBookId = id;
-  state.currentPage = 12;
-  writeJSON(STORAGE.books, state.books);
-  saveCurrentState();
-  renderBookList();
-  openCurrentBook();
+  reader.readAsArrayBuffer(file);
 }
 
 async function selectBook(bookId) {
@@ -264,26 +278,49 @@ async function openCurrentBook() {
   $('#pdfWrapper').classList.remove('hidden');
   $('#bookInfoBadge').textContent = book.imported ? 'PDF مستورد' : 'PDF';
 
-  const pdfUrl = book.pdfUrl || './sample-network-a2.pdf';
-  if (!book.pdfUrl) {
+  try {
+    let pdfUrl;
+    if (book.imported) {
+      const pdfData = localStorage.getItem(`${STORAGE.books}:${book.id}:data`);
+      if (pdfData) {
+        const binaryString = atob(pdfData);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: 'application/pdf' });
+        pdfUrl = URL.createObjectURL(blob);
+      } else {
+        throw new Error('No PDF data found');
+      }
+    } else {
+      pdfUrl = book.pdfUrl || './sample-network-a2.pdf';
+    }
+
+    if (state.pdfObjectUrl && state.pdfObjectUrl !== pdfUrl) {
+      try {
+        URL.revokeObjectURL(state.pdfObjectUrl);
+      } catch (e) {}
+    }
+    state.pdfObjectUrl = pdfUrl;
+    
+    await ensurePdfWorker();
+    
+    state.pdfDoc = await window.pdfjsLib.getDocument(pdfUrl).promise;
+    const pageCount = state.pdfDoc.numPages;
+    state.currentPage = clamp(state.currentPage || 1, 1, pageCount);
+
+    $('#pageIndicator').textContent = `${state.currentPage} / ${pageCount}`;
+    $('#zoomSlider').value = state.zoom;
+    renderPage();
+    renderNotes();
+    renderAudio();
+    renderVocab();
+  } catch (err) {
+    console.error('Error opening book:', err);
     $('#emptyState').classList.remove('hidden');
-    setStatus('افتح ملف PDF', 'استورد كتاب Netzwerk A2 من الهاتف');
-    return;
+    setStatus('خطأ في فتح الملف', 'تحقق من صيغة الملف: ' + err.message);
   }
-
-  if (state.pdfObjectUrl && state.pdfObjectUrl !== pdfUrl) URL.revokeObjectURL(state.pdfObjectUrl);
-  state.pdfObjectUrl = pdfUrl;
-  await ensurePdfWorker();
-  state.pdfDoc = await window.pdfjsLib.getDocument(pdfUrl).promise;
-  const pageCount = state.pdfDoc.numPages;
-  state.currentPage = clamp(state.currentPage || 1, 1, pageCount);
-
-  $('#pageIndicator').textContent = `${state.currentPage} / ${pageCount}`;
-  $('#zoomSlider').value = state.zoom;
-  renderPage();
-  renderNotes();
-  renderAudio();
-  renderVocab();
 }
 
 async function ensurePdfWorker() {
@@ -311,33 +348,39 @@ async function renderPage() {
   }
   state.rendering = true;
 
-  const page = await state.pdfDoc.getPage(state.currentPage);
-  const viewport = page.getViewport({ scale: state.zoom });
-  const canvas = $('#pdfCanvas');
-  const ctx = canvas.getContext('2d');
+  try {
+    const page = await state.pdfDoc.getPage(state.currentPage);
+    const viewport = page.getViewport({ scale: state.zoom });
+    const canvas = $('#pdfCanvas');
+    const ctx = canvas.getContext('2d');
 
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
-  canvas.style.width = `${viewport.width}px`;
-  canvas.style.height = `${viewport.height}px`;
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    canvas.style.width = `${viewport.width}px`;
+    canvas.style.height = `${viewport.height}px`;
 
-  $('#pdfWrapper').style.width = `${viewport.width}px`;
-  $('#pdfWrapper').style.height = `${viewport.height}px`;
-  $('#overlayLayer').style.width = `${viewport.width}px`;
-  $('#overlayLayer').style.height = `${viewport.height}px`;
+    $('#pdfWrapper').style.width = `${viewport.width}px`;
+    $('#pdfWrapper').style.height = `${viewport.height}px`;
+    $('#overlayLayer').style.width = `${viewport.width}px`;
+    $('#overlayLayer').style.height = `${viewport.height}px`;
 
-  await page.render({ canvasContext: ctx, viewport }).promise;
-
-  state.rendering = false;
-  $('#pageIndicator').textContent = `${state.currentPage} / ${state.pdfDoc.numPages}`;
-  renderOverlay();
-  renderPageSummary();
-  renderAnswers();
-  if (state.renderPending) {
-    const next = state.renderPending;
-    state.renderPending = null;
-    state.currentPage = next;
-    renderPage();
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    
+    state.rendering = false;
+    $('#pageIndicator').textContent = `${state.currentPage} / ${state.pdfDoc.numPages}`;
+    renderOverlay();
+    renderPageSummary();
+    renderAnswers();
+    
+    if (state.renderPending) {
+      const next = state.renderPending;
+      state.renderPending = null;
+      state.currentPage = next;
+      renderPage();
+    }
+  } catch (err) {
+    console.error('Error rendering page:', err);
+    state.rendering = false;
   }
 }
 
@@ -673,6 +716,6 @@ function renderVocab() {
 
 window.addEventListener('beforeunload', saveCurrentState);
 init().catch(err => {
-  console.error(err);
-  alert('حدث خطأ أثناء تشغيل التطبيق.');
+  console.error('Initialization error:', err);
+  alert('حدث خطأ أثناء تشغيل التطبيق: ' + err.message);
 });
