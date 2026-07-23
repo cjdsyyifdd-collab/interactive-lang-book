@@ -29,7 +29,8 @@ const state = {
   showOverlay: true,
   activeTool: 'write',
   pdfObjectUrl: null,
-  selectedOverlayId: null
+  selectedOverlayId: null,
+  editMode: false
 };
 
 const $ = (s) => document.querySelector(s);
@@ -51,16 +52,22 @@ function kOverlay(bookId, page, id) { return `${STORAGE.overlays}:${bookId}:${pa
 const chapter1Data = {
   bookTitle: 'Netzwerk neu A2',
   subtitle: 'Kapitel 1 - über Vergangenes berichten',
-  pages: [12, 13, 14, 15, 16, 17, 18, 19],
+  pages: [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
   templates: {}
 };
 
 async function loadChapterTemplates() {
-  const res = await fetch('./data/chapter1.json');
-  const json = await res.json();
-  chapter1Data.templates = json.templates || {};
-  chapter1Data.bookTitle = json.bookTitle || chapter1Data.bookTitle;
-  chapter1Data.subtitle = json.chapterTitle || chapter1Data.subtitle;
+  try {
+    const res = await fetch('./data/chapter1.json');
+    if (!res.ok) throw new Error('Failed to load templates');
+    const json = await res.json();
+    chapter1Data.templates = json.templates || {};
+    chapter1Data.bookTitle = json.bookTitle || chapter1Data.bookTitle;
+    chapter1Data.subtitle = json.chapterTitle || chapter1Data.subtitle;
+    chapter1Data.pages = json.pages || chapter1Data.pages;
+  } catch (err) {
+    console.warn('Could not load chapter templates:', err);
+  }
 }
 
 function defaultBooks() {
@@ -140,7 +147,10 @@ async function init() {
   await openCurrentBook();
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
+    navigator.serviceWorker.register('./sw.js').then(
+      () => console.log('✓ Service Worker registered'),
+      () => console.warn('Service Worker registration failed')
+    );
   }
 }
 
@@ -176,6 +186,12 @@ function setupUI() {
   $('#audioFileInput').addEventListener('change', (e) => importAudio(e.target.files?.[0]));
   $('#addVocabBtn').addEventListener('click', addVocab);
 
+  $('#editModeBtn').addEventListener('click', toggleEditMode);
+  $('#addFieldBtn').addEventListener('click', showAddFieldDialog);
+  $('#exportBtn').addEventListener('click', exportOverlays);
+  $('#importOverlayBtn').addEventListener('click', () => $('#overlayFileInput').click());
+  $('#overlayFileInput').addEventListener('change', importOverlayFile);
+
   $('#searchBtn').addEventListener('click', () => alert('ميزة البحث ستُضاف في النسخة التالية.'));
   $('#bookmarkBtn').addEventListener('click', () => alert(`تم حفظ الصفحة ${state.currentPage} كإشارة مرجعية.`));
   $('#penBtn').addEventListener('click', () => alert('يمكنك الكتابة داخل الخانات الظاهرة فوق الصفحة.'));
@@ -193,7 +209,8 @@ function setTool(tool) {
     note: 'وضع الملاحظات',
     highlight: 'وضع التظليل',
     write: 'وضع الكتابة',
-    erase: 'وضع المسح'
+    erase: 'وضع المسح',
+    edit: 'وضع التحرير'
   };
   $('#toolState').textContent = map[tool] || 'جاهز';
 }
@@ -328,7 +345,7 @@ function renderOverlay() {
   const layer = $('#overlayLayer');
   layer.innerHTML = '';
   layer.classList.toggle('hidden', !state.showOverlay);
-  if (!state.showOverlay) return;
+  if (!state.showOverlay && !state.editMode) return;
 
   const fields = getPageTemplates(state.currentPage);
   const rect = $('#pdfCanvas').getBoundingClientRect();
@@ -337,11 +354,18 @@ function renderOverlay() {
 
   fields.forEach(field => {
     const box = document.createElement('div');
-    box.className = 'field-box';
+    box.className = `field-box ${state.editMode ? 'editable' : ''}`;
     box.style.left = `${(field.x / 100) * width}px`;
     box.style.top = `${(field.y / 100) * height}px`;
     box.style.width = `${(field.w / 100) * width}px`;
     box.style.height = `${(field.h / 100) * height}px`;
+
+    if (state.editMode) {
+      box.addEventListener('click', () => editField(field));
+      box.style.cursor = 'move';
+      box.style.border = '2px solid #ff6b6b';
+      return;
+    }
 
     const tag = document.createElement('span');
     tag.className = 'field-tag';
@@ -385,6 +409,93 @@ function renderOverlay() {
     box.appendChild(mark);
     layer.appendChild(box);
   });
+}
+
+function toggleEditMode() {
+  state.editMode = !state.editMode;
+  if (state.editMode) {
+    setTool('edit');
+    $('#editModeBtn').textContent = 'تم التحرير ✓';
+  } else {
+    $('#editModeBtn').textContent = 'تحرير الحقول';
+  }
+  renderOverlay();
+}
+
+function editField(field) {
+  const label = prompt('اسم الحقل:', field.label || field.id);
+  if (label === null) return;
+  field.label = label;
+  saveFieldChanges();
+  renderOverlay();
+}
+
+function showAddFieldDialog() {
+  const id = prompt('معرّف الحقل (فريد):', `field_${Date.now()}`);
+  if (!id) return;
+  const label = prompt('اسم الحقل:', 'حقل جديد');
+  if (!label) return;
+  const type = prompt('نوع الحقل (text/checkbox):', 'text');
+  
+  const rect = $('#pdfCanvas').getBoundingClientRect();
+  const x = prompt('الموضع X (%):', '10');
+  const y = prompt('الموضع Y (%):', '10');
+  const w = prompt('العرض (%):', '20');
+  const h = prompt('الارتفاع (%):', '5');
+
+  if (!x || !y || !w || !h) return;
+
+  const field = {
+    id, label, type: type || 'text',
+    x: parseFloat(x), y: parseFloat(y),
+    w: parseFloat(w), h: parseFloat(h),
+    placeholder: 'اكتب هنا'
+  };
+
+  const manual = readJSON(STORAGE.overlays, {});
+  const key = `${state.currentBookId}:${state.currentPage}`;
+  manual[key] = manual[key] || [];
+  manual[key].push(field);
+  writeJSON(STORAGE.overlays, manual);
+  renderOverlay();
+}
+
+function saveFieldChanges() {
+  const manual = readJSON(STORAGE.overlays, {});
+  const fields = getPageTemplates(state.currentPage);
+  manual[`${state.currentBookId}:${state.currentPage}`] = fields;
+  writeJSON(STORAGE.overlays, manual);
+}
+
+function exportOverlays() {
+  const overlays = readJSON(STORAGE.overlays, {});
+  const data = JSON.stringify(overlays, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `overlays_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importOverlayFile(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      const manual = readJSON(STORAGE.overlays, {});
+      Object.assign(manual, data);
+      writeJSON(STORAGE.overlays, manual);
+      alert('تم استيراد الحقول بنجاح!');
+      renderOverlay();
+    } catch {
+      alert('خطأ: ملف JSON غير صحيح');
+    }
+  };
+  reader.readAsText(file);
 }
 
 function renderAnswers() {
